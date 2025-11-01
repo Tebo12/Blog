@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+  {% if mode == 'create' %}
+    <h2>New post</h2>
+  {% else %}
+    <h2>Edit post #{{ post.id }}</h2>
+  {% endif %}
+
+  {% if error %}
+    <p style="color:#c00;">Ошибка: {{ error }}</p>
+  {% endif %}
+  <p class="muted">Эту запись можно создать через эту форму или через REST API (Swagger — /docs).</p>
+
+  <form method="post" action="{% if mode == 'edit' and post %}/html/posts/{{ post.id }}/edit{% else %}/html/posts/new{% endif %}">
+    <label>Author
+      <select name="authorId" {% if not users or mode == 'edit' %}disabled{% endif %} required>
+        {% for u in users %}
+          <option value="{{ u.id }}" {% if post and u.id == post.authorId %}selected{% endif %}>{{ u.login }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <br>
+    <label>Title
+      <input type="text" name="title" value="{{ post.title if post else '' }}" required>
+    </label>
+    <br>
+    <label>Content
+      <textarea name="content" rows="6" cols="60" required>{{ post.content if post else '' }}</textarea>
+    </label>
+    <br>
+    <button type="submit" {% if not users and mode != 'edit' %}disabled{% endif %}>{% if mode == 'edit' %}Save{% else %}Submit{% endif %}</button>
+  </form>
+
+  {% if not users %}
+    <p class="muted">Сначала создайте пользователя через /docs → POST /users.</p>
+  {% endif %}
+
+  <p><a href="/">← Back</a></p>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>All posts</h2>
+  {% if posts %}
+    <ul>
+      {% for p in posts %}
+        <li>
+          <a href="/html/posts/{{ p.id }}">{{ p.title }}</a>
+          <span class="muted">by {{ user_id_to_login.get(p.authorId, 'unknown') }} · {{ p.createdAt }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No posts yet.</p>
+  {% endif %}
+  <p><a href="/html/posts/new">Create a post</a></p>
+{% endblock %}

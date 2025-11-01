@@ -1,0 +1,48 @@
+INFO:     Started server process [32037]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:38576 - "GET /html/posts/new HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39462 - "POST /html/posts/new HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:39462 - "GET /html/posts/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39462 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39462 - "GET /html/posts/new HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48462 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48462 - "GET /html/posts/new HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46826 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46826 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46826 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43604 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43604 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55816 - "POST /users/ HTTP/1.1" 201 Created
+INFO:     127.0.0.1:37078 - "GET /users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40296 - "POST /posts/ HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56444 - "POST /posts/ HTTP/1.1" 201 Created
+INFO:     127.0.0.1:44546 - "POST /users/ HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:38508 - "POST /posts/ HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:41816 - "GET /html/posts/new HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41676 - "POST /html/posts/new HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:41676 - "GET /html/posts/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41676 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40784 - "GET /html/posts/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40784 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40784 - "GET /html/posts/4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40784 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40784 - "GET /html/posts/4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40784 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44136 - "GET /html/posts/4 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44136 - "GET /html/posts/4/edit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44136 - "POST /html/posts/new HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:44136 - "GET /html/posts/6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44136 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44136 - "GET /html/posts/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44136 - "GET /html/posts/3/edit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37368 - "POST /html/posts/new HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:37368 - "GET /html/posts/7 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37368 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46506 - "GET /html/posts/5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37532 - "GET /posts/?authorId=2 HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32037]
