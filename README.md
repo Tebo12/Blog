@@ -41,6 +41,18 @@ curl -sS -X POST http://127.0.0.1:8000/posts \
   -d '{"authorId":1,"title":"Hello","content":"First post"}'
 ```
 
+Windows PowerShell:
+```powershell
+# Создать пользователя
+irm http://127.0.0.1:8000/users -Method Post -ContentType "application/json" -Body '{"email":"alice@example.com","login":"alice","password":"secret123"}'
+
+# Список пользователей
+irm http://127.0.0.1:8000/users
+
+# Создать пост
+irm http://127.0.0.1:8000/posts -Method Post -ContentType "application/json" -Body '{"authorId":1,"title":"Hello","content":"First post"}'
+```
+
 ### Скриншоты
 Ниже — несколько кадров для проверки успешных и ошибочных сценариев (папка `screenshots/`).
 
