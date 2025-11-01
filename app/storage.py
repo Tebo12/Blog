@@ -1,20 +1,18 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from pydantic import ValidationError
 
-from .models import User, UserCreate, UserUpdate, Post, PostCreate, PostUpdate
-
+from .models import Post, PostCreate, PostUpdate, User, UserCreate, UserUpdate
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 USERS_FILE = DATA_DIR / "users.json"
 POSTS_FILE = DATA_DIR / "posts.json"
 
 
-_user_id_to_user: Dict[int, User] = {}
-_post_id_to_post: Dict[int, Post] = {}
+_user_id_to_user: dict[int, User] = {}
+_post_id_to_post: dict[int, Post] = {}
 _next_user_id: int = 1
 _next_post_id: int = 1
 
@@ -43,15 +41,15 @@ async def create_user(payload: UserCreate) -> User:
     return user
 
 
-async def list_users() -> List[User]:
+async def list_users() -> list[User]:
     return list(sorted(_user_id_to_user.values(), key=lambda u: u.id))
 
 
-async def get_user(user_id: int) -> Optional[User]:
+async def get_user(user_id: int) -> User | None:
     return _user_id_to_user.get(user_id)
 
 
-async def update_user(user_id: int, changes: UserUpdate) -> Optional[User]:
+async def update_user(user_id: int, changes: UserUpdate) -> User | None:
     user = _user_id_to_user.get(user_id)
     if user is None:
         return None
@@ -96,18 +94,18 @@ async def create_post(payload: PostCreate) -> Post:
     return post
 
 
-async def list_posts(author_id: Optional[int] = None) -> List[Post]:
+async def list_posts(author_id: int | None = None) -> list[Post]:
     posts = list(_post_id_to_post.values())
     if author_id is not None:
         posts = [p for p in posts if p.authorId == author_id]
     return list(sorted(posts, key=lambda p: p.id))
 
 
-async def get_post(post_id: int) -> Optional[Post]:
+async def get_post(post_id: int) -> Post | None:
     return _post_id_to_post.get(post_id)
 
 
-async def update_post(post_id: int, changes: PostUpdate) -> Optional[Post]:
+async def update_post(post_id: int, changes: PostUpdate) -> Post | None:
     post = _post_id_to_post.get(post_id)
     if post is None:
         return None

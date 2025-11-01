@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -15,9 +14,9 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
-    login: Optional[str] = Field(default=None, min_length=3, max_length=64)
-    password: Optional[str] = Field(default=None, min_length=6, max_length=128)
+    email: EmailStr | None = None
+    login: str | None = Field(default=None, min_length=3, max_length=64)
+    password: str | None = Field(default=None, min_length=6, max_length=128)
 
 
 class User(UserBase):
@@ -37,8 +36,8 @@ class PostCreate(PostBase):
 
 
 class PostUpdate(BaseModel):
-    title: Optional[str] = Field(default=None, min_length=1, max_length=200)
-    content: Optional[str] = Field(default=None, min_length=1)
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    content: str | None = Field(default=None, min_length=1)
 
 
 class Post(PostBase):

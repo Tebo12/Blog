@@ -1,0 +1,44 @@
+[project]
+name = "simple-blog-api"
+version = "0.1.0"
+description = "Async FastAPI blog API with in-memory storage and optional HTML pages"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Student" }]
+dependencies = [
+  "fastapi==0.115.4",
+  "uvicorn[standard]==0.30.6",
+  "pydantic==2.9.2",
+  "jinja2==3.1.4",
+  "orjson==3.10.7",
+  "email-validator==2.2.0",
+  "python-multipart==0.0.12",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+# Use Ruff as linter; we'll use its formatter too.
+lint.select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+ignore_missing_imports = true
+no_implicit_optional = false
+pretty = true
+show_error_codes = true
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"

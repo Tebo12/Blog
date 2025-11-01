@@ -1,0 +1,61 @@
+erDiagram
+  users ||--o{ posts : authors
+  users ||--o{ comments : writes
+  users ||--o{ favorites : saves
+  users ||--o{ subscriptions : follows
+  users ||--o{ subscriptions : followed_by
+
+  posts ||--o{ comments : has
+  posts ||--o{ post_tags : tagged
+  posts ||--o{ favorites : saved_in
+
+  tags ||--o{ post_tags : used_in
+
+  users {
+    bigint id PK
+    text   email
+    text   login
+    text   password_hash
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  posts {
+    bigint id PK
+    bigint author_id FK
+    text   title
+    text   content
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  tags {
+    bigint id PK
+    text   name
+  }
+
+  post_tags {
+    bigint post_id FK
+    bigint tag_id  FK
+  }
+
+  favorites {
+    bigint user_id FK
+    bigint post_id FK
+    timestamptz created_at
+  }
+
+  comments {
+    bigint id PK
+    bigint post_id   FK
+    bigint author_id FK
+    text   content
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  subscriptions {
+    bigint follower_id FK
+    bigint followee_id FK
+    timestamptz created_at
+  }

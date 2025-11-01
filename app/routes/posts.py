@@ -1,10 +1,7 @@
-from typing import List, Optional
-
 from fastapi import APIRouter, HTTPException, Query, status
 
-from ..models import Post, PostCreate, PostUpdate
 from .. import storage
-
+from ..models import Post, PostCreate, PostUpdate
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -14,11 +11,11 @@ async def create_post(post_in: PostCreate) -> Post:
     try:
         return await storage.create_post(post_in)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/", response_model=List[Post])
-async def list_posts(authorId: Optional[int] = Query(default=None)) -> List[Post]:
+@router.get("/", response_model=list[Post])
+async def list_posts(authorId: int | None = Query(default=None)) -> list[Post]:
     return await storage.list_posts(author_id=authorId)
 
 

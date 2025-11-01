@@ -1,10 +1,7 @@
-from typing import List
-
 from fastapi import APIRouter, HTTPException, status
 
-from ..models import User, UserCreate, UserUpdate
 from .. import storage
-
+from ..models import User, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -14,11 +11,11 @@ async def create_user(user_in: UserCreate) -> User:
     try:
         return await storage.create_user(user_in)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
-@router.get("/", response_model=List[User])
-async def list_users() -> List[User]:
+@router.get("/", response_model=list[User])
+async def list_users() -> list[User]:
     return await storage.list_users()
 
 
@@ -35,7 +32,7 @@ async def update_user(user_id: int, user_in: UserUpdate) -> User:
     try:
         user = await storage.update_user(user_id, user_in)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
     return user

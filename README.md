@@ -18,7 +18,7 @@ uvicorn app.main:app --reload
 - CRUD для пользователей и постов (async)
 - Валидация входных данных (Pydantic)
 - HTML-страницы: список постов, просмотр, создание, редактирование
-- Автосохранение данных в JSON (опционально)
+- Автосохранение данных в JSON 
 
 ### Эндпоинты
 - Users: `POST /users`, `GET /users`, `GET /users/{id}`, `PUT /users/{id}`, `DELETE /users/{id}`
@@ -97,4 +97,45 @@ irm http://127.0.0.1:8000/posts -Method Post -ContentType "application/json" -Bo
   ![EditPageRes](screenshots/EditPageRes.png)
   
   ![EditPageInOurList](screenshots/EditPageInOurList.png)
+
+
+
+### База данных (DDL) и ER‑диаграмма
+- DDL: `db/schema.sql` — таблицы users, posts, tags, post_tags, favorites, comments, subscriptions (PostgreSQL‑style).
+- ER‑диаграмма (Mermaid): `docs/erd.mmd`. Можно просмотреть в Markdown‑просмотрщике с поддержкой Mermaid или сконвертировать в PNG.
+![ERD](docs/erd.png)
+
+### Инструменты качества кода
+- Конфиги в `pyproject.toml` (ruff, mypy). Пин‑лок: `requirements.lock`.
+- Установка инструментов:
+```bash
+pip install -r requirements.lock
+```
+- Форматирование и линтинг:
+```bash
+# форматер
+ruff format
+# линтер 
+ruff check --fix
+# типы
+mypy .
+```
+#### Результаты выполнения 
+
+![step-1](screenshots/1.png)
+
+![step-2](screenshots/2.png)
+
+![step-3](screenshots/3.png)
+
+- Git‑хуки:
+```bash
+pip install pre-commit
+pre-commit install
+# теперь при коммите автоматически запустятся ruff и mypy
+```
+## Результат выполнения
+![githooks](screenshots/githooks.png)
+
+
 

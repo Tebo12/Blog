@@ -1,15 +1,13 @@
 from pathlib import Path
-from typing import Dict
 
-from fastapi import FastAPI, HTTPException, Request, Form
+from fastapi import FastAPI, Form, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from .routes.users import router as users_router
-from .routes.posts import router as posts_router
 from . import storage
 from .models import PostCreate, PostUpdate
-
+from .routes.posts import router as posts_router
+from .routes.users import router as users_router
 
 app = FastAPI(title="Simple Blog API")
 
@@ -36,7 +34,7 @@ async def _shutdown() -> None:
 async def index(request: Request) -> HTMLResponse:
     posts = await storage.list_posts()
     users = await storage.list_users()
-    user_id_to_login: Dict[int, str] = {u.id: u.login for u in users}
+    user_id_to_login: dict[int, str] = {u.id: u.login for u in users}
     return templates.TemplateResponse(
         "index.html",
         {
@@ -59,7 +57,7 @@ async def html_post_new(request: Request) -> HTMLResponse:
 @app.post("/html/posts/new", response_class=RedirectResponse)
 async def html_post_new_post(
     request: Request, title: str = Form(...), content: str = Form(...), authorId: int = Form(...)
-) -> RedirectResponse:
+) -> Response:
     try:
         post = PostCreate(title=title, content=content, authorId=authorId)
         created = await storage.create_post(post)
