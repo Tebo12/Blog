@@ -1,16 +1,17 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
     email: EmailStr
     login: str = Field(min_length=3, max_length=64)
-    password: str = Field(min_length=6, max_length=128)
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class UserCreate(UserBase):
-    pass
+    password: str = Field(min_length=6, max_length=128)
 
 
 class UserUpdate(BaseModel):
@@ -21,14 +22,16 @@ class UserUpdate(BaseModel):
 
 class User(UserBase):
     id: int
-    createdAt: datetime
-    updatedAt: datetime
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")
 
 
 class PostBase(BaseModel):
-    authorId: int
+    author_id: int = Field(alias="authorId")
     title: str = Field(min_length=1, max_length=200)
     content: str = Field(min_length=1)
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
 
 class PostCreate(PostBase):
@@ -42,5 +45,5 @@ class PostUpdate(BaseModel):
 
 class Post(PostBase):
     id: int
-    createdAt: datetime
-    updatedAt: datetime
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")

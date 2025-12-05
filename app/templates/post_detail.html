@@ -1,11 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
   <article>
-    <h2>{{ post.title }}</h2>
-    <p class="muted">by {{ author.login if author else 'unknown' }} · {{ post.createdAt }}</p>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>{{ post.title }}</h2>
+        {% if user %}
+            {% if is_favorited %}
+                <form action="/favorites/{{ post.id }}/remove" method="post" style="margin: 0;">
+                    <button type="submit" style="background: transparent; border: 1px solid #ccc; color: red; cursor: pointer;">Unsave</button>
+                </form>
+            {% else %}
+                <form action="/favorites/{{ post.id }}/add" method="post" style="margin: 0;">
+                    <button type="submit" style="background: transparent; border: 1px solid #ccc; color: green; cursor: pointer;">Save to Favorites</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <p class="muted">by {{ author.login if author else 'unknown' }} · {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
     <div>
-      <p>{{ post.content }}</p>
+      <p style="white-space: pre-wrap;">{{ post.content }}</p>
     </div>
   </article>
-  <p><a href="/">← Back</a> · <a href="/html/posts/{{ post.id }}/edit">Edit</a></p>
+  <p>
+      <a href="/">← Back</a> 
+      {% if user and user.id == post.author_id %}
+        · <a href="/html/posts/{{ post.id }}/edit">Edit</a>
+      {% endif %}
+  </p>
 {% endblock %}

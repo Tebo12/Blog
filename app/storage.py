@@ -1,161 +1,148 @@
-import json
-from datetime import datetime, timezone
-from pathlib import Path
+from sqlalchemy import delete, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from pydantic import ValidationError
-
-from .models import Post, PostCreate, PostUpdate, User, UserCreate, UserUpdate
-
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-USERS_FILE = DATA_DIR / "users.json"
-POSTS_FILE = DATA_DIR / "posts.json"
+from app import tables
+from app.models import PostCreate, PostUpdate, UserCreate, UserUpdate
+from app.security import get_password_hash
 
 
-_user_id_to_user: dict[int, User] = {}
-_post_id_to_post: dict[int, Post] = {}
-_next_user_id: int = 1
-_next_post_id: int = 1
+async def create_user(session: AsyncSession, payload: UserCreate) -> tables.User:
+    stmt = select(tables.User).where((tables.User.email == payload.email) | (tables.User.login == payload.login))
+    result = await session.execute(stmt)
+    if result.scalars().first():
+        raise ValueError("email or login already exists")
 
-
-def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-async def create_user(payload: UserCreate) -> User:
-    global _next_user_id
-    for user in _user_id_to_user.values():
-        if user.email == payload.email:
-            raise ValueError("email already exists")
-        if user.login == payload.login:
-            raise ValueError("login already exists")
-    user = User(
-        id=_next_user_id,
+    hashed_pw = get_password_hash(payload.password)
+    user = tables.User(
         email=payload.email,
         login=payload.login,
-        password=payload.password,
-        createdAt=_utcnow(),
-        updatedAt=_utcnow(),
+        password_hash=hashed_pw,
     )
-    _user_id_to_user[user.id] = user
-    _next_user_id += 1
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
     return user
 
 
-async def list_users() -> list[User]:
-    return list(sorted(_user_id_to_user.values(), key=lambda u: u.id))
+async def get_user(session: AsyncSession, user_id: int) -> tables.User | None:
+    return await session.get(tables.User, user_id)
 
 
-async def get_user(user_id: int) -> User | None:
-    return _user_id_to_user.get(user_id)
+async def get_user_by_login_or_email(session: AsyncSession, login_str: str) -> tables.User | None:
+    stmt = select(tables.User).where(or_(tables.User.email == login_str, tables.User.login == login_str))
+    result = await session.execute(stmt)
+    return result.scalars().first()
 
 
-async def update_user(user_id: int, changes: UserUpdate) -> User | None:
-    user = _user_id_to_user.get(user_id)
-    if user is None:
-        return None
-    if changes.email is not None and changes.email != user.email:
-        for other in _user_id_to_user.values():
-            if other.email == changes.email and other.id != user_id:
-                raise ValueError("email already exists")
-        user.email = changes.email
-    if changes.login is not None and changes.login != user.login:
-        for other in _user_id_to_user.values():
-            if other.login == changes.login and other.id != user_id:
-                raise ValueError("login already exists")
-        user.login = changes.login
-    if changes.password is not None:
-        user.password = changes.password
-    user.updatedAt = _utcnow()
-    _user_id_to_user[user_id] = user
+async def list_users(session: AsyncSession) -> list[tables.User]:
+    stmt = select(tables.User).order_by(tables.User.id)
+    result = await session.execute(stmt)
+    return list(result.scalars().all())
+
+
+async def update_user(session: AsyncSession, user_id: int, payload: UserUpdate) -> tables.User:
+    user = await get_user(session, user_id)
+    if not user:
+        raise ValueError("user not found")
+
+    if payload.email is not None:
+        stmt = select(tables.User).where(tables.User.email == payload.email, tables.User.id != user_id)
+        if (await session.execute(stmt)).scalars().first():
+            raise ValueError("email already exists")
+        user.email = payload.email
+
+    if payload.login is not None:
+        stmt = select(tables.User).where(tables.User.login == payload.login, tables.User.id != user_id)
+        if (await session.execute(stmt)).scalars().first():
+            raise ValueError("login already exists")
+        user.login = payload.login
+
+    if payload.password is not None:
+        user.password_hash = get_password_hash(payload.password)
+
+    await session.commit()
+    await session.refresh(user)
     return user
 
 
-async def delete_user(user_id: int) -> bool:
-    if user_id in _user_id_to_user:
-        del _user_id_to_user[user_id]
-        return True
-    return False
-
-
-async def create_post(payload: PostCreate) -> Post:
-    global _next_post_id
-    if payload.authorId not in _user_id_to_user:
+async def create_post(session: AsyncSession, payload: PostCreate) -> tables.Post:
+    author = await get_user(session, payload.author_id)
+    if not author:
         raise ValueError("author does not exist")
-    post = Post(
-        id=_next_post_id,
-        authorId=payload.authorId,
+
+    post = tables.Post(
+        author_id=payload.author_id,
         title=payload.title,
         content=payload.content,
-        createdAt=_utcnow(),
-        updatedAt=_utcnow(),
     )
-    _post_id_to_post[post.id] = post
-    _next_post_id += 1
+    session.add(post)
+    await session.commit()
+    await session.refresh(post)
     return post
 
 
-async def list_posts(author_id: int | None = None) -> list[Post]:
-    posts = list(_post_id_to_post.values())
-    if author_id is not None:
-        posts = [p for p in posts if p.authorId == author_id]
-    return list(sorted(posts, key=lambda p: p.id))
+async def get_post(session: AsyncSession, post_id: int) -> tables.Post | None:
+    return await session.get(tables.Post, post_id)
 
 
-async def get_post(post_id: int) -> Post | None:
-    return _post_id_to_post.get(post_id)
+async def list_posts(session: AsyncSession, search_query: str | None = None) -> list[tables.Post]:
+    stmt = select(tables.Post).order_by(tables.Post.created_at.desc())
+
+    if search_query:
+        term = f"%{search_query}%"
+        stmt = stmt.where(or_(tables.Post.title.ilike(term), tables.Post.content.ilike(term)))
+
+    result = await session.execute(stmt)
+    return list(result.scalars().all())
 
 
-async def update_post(post_id: int, changes: PostUpdate) -> Post | None:
-    post = _post_id_to_post.get(post_id)
-    if post is None:
-        return None
-    if changes.title is not None:
-        post.title = changes.title
-    if changes.content is not None:
-        post.content = changes.content
-    post.updatedAt = _utcnow()
-    _post_id_to_post[post_id] = post
+async def update_post(session: AsyncSession, post_id: int, payload: PostUpdate) -> tables.Post:
+    post = await get_post(session, post_id)
+    if not post:
+        raise ValueError("post not found")
+
+    if payload.title is not None:
+        post.title = payload.title
+    if payload.content is not None:
+        post.content = payload.content
+
+    await session.commit()
+    await session.refresh(post)
     return post
 
 
-async def delete_post(post_id: int) -> bool:
-    if post_id in _post_id_to_post:
-        del _post_id_to_post[post_id]
-        return True
-    return False
+async def add_favorite(session: AsyncSession, user_id: int, post_id: int) -> None:
+    stmt = select(tables.Favorite).where(tables.Favorite.user_id == user_id, tables.Favorite.post_id == post_id)
+    if (await session.execute(stmt)).scalars().first():
+        return
+
+    fav = tables.Favorite(user_id=user_id, post_id=post_id)
+    session.add(fav)
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
 
 
-async def save_data() -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    users_data = [u.model_dump() for u in _user_id_to_user.values()]
-    posts_data = [p.model_dump() for p in _post_id_to_post.values()]
-    with USERS_FILE.open("w", encoding="utf-8") as f:
-        json.dump(users_data, f, ensure_ascii=False, indent=2, default=str)
-    with POSTS_FILE.open("w", encoding="utf-8") as f:
-        json.dump(posts_data, f, ensure_ascii=False, indent=2, default=str)
+async def remove_favorite(session: AsyncSession, user_id: int, post_id: int) -> None:
+    stmt = delete(tables.Favorite).where(tables.Favorite.user_id == user_id, tables.Favorite.post_id == post_id)
+    await session.execute(stmt)
+    await session.commit()
 
 
-async def load_data() -> None:
-    global _next_user_id, _next_post_id
-    _user_id_to_user.clear()
-    _post_id_to_post.clear()
+async def is_favorited(session: AsyncSession, user_id: int, post_id: int) -> bool:
+    stmt = select(tables.Favorite).where(tables.Favorite.user_id == user_id, tables.Favorite.post_id == post_id)
+    result = await session.execute(stmt)
+    return result.scalars().first() is not None
 
-    if USERS_FILE.exists():
-        try:
-            users_raw = json.loads(USERS_FILE.read_text(encoding="utf-8"))
-            for item in users_raw:
-                user = User(**item)
-                _user_id_to_user[user.id] = user
-        except (json.JSONDecodeError, ValidationError):
-            pass
-    if POSTS_FILE.exists():
-        try:
-            posts_raw = json.loads(POSTS_FILE.read_text(encoding="utf-8"))
-            for item in posts_raw:
-                post = Post(**item)
-                _post_id_to_post[post.id] = post
-        except (json.JSONDecodeError, ValidationError):
-            pass
 
-    _next_user_id = (max(_user_id_to_user.keys()) + 1) if _user_id_to_user else 1
-    _next_post_id = (max(_post_id_to_post.keys()) + 1) if _post_id_to_post else 1
+async def list_favorites(session: AsyncSession, user_id: int) -> list[tables.Post]:
+    stmt = (
+        select(tables.Post)
+        .join(tables.Favorite, tables.Favorite.post_id == tables.Post.id)
+        .where(tables.Favorite.user_id == user_id)
+        .order_by(tables.Favorite.created_at.desc())
+    )
+    result = await session.execute(stmt)
+    return list(result.scalars().all())

@@ -1,10 +1,10 @@
 [project]
 name = "simple-blog-api"
 version = "0.1.0"
-description = "Async FastAPI blog API with in-memory storage and optional HTML pages"
-readme = "README.md"
+description = "A simple asynchronous REST API for a blog with HTML pages and JSON persistence."
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
 requires-python = ">=3.10"
-authors = [{ name = "Student" }]
 dependencies = [
   "fastapi==0.115.4",
   "uvicorn[standard]==0.30.6",
@@ -13,16 +13,23 @@ dependencies = [
   "orjson==3.10.7",
   "email-validator==2.2.0",
   "python-multipart==0.0.12",
+  "sqlalchemy[asyncio]==2.0.36",
+  "aiosqlite==0.20.0",
+  "alembic==1.13.3",
+  "passlib[bcrypt]==1.7.4",
+  "python-jose[cryptography]==3.3.0",
+  "ruff==0.6.9",
+  "mypy==1.11.2",
+  "pre-commit==3.8.0",
 ]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py310"
-# Use Ruff as linter; we'll use its formatter too.
-lint.select = ["E", "F", "I", "UP", "B"]
 
-[tool.ruff.lint.isort]
-known-first-party = ["app"]
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -35,10 +42,3 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unreachable = true
 ignore_missing_imports = true
-no_implicit_optional = false
-pretty = true
-show_error_codes = true
-
-[build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
